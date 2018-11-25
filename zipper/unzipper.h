@@ -17,6 +17,7 @@ namespace zipper {
   public:
     Unzipper(std::istream& buffer);
     Unzipper(std::vector<unsigned char>& buffer);
+    Unzipper(void* buffer, size_t n_size);
     Unzipper(const std::string& zipname);
     Unzipper(const std::string& zipname, const std::string& password);
 

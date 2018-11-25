@@ -384,14 +384,21 @@ namespace zipper {
       return initMemory(m_filefunc);
     }
 
+    bool initWithBuffer(void* buffer, size_t buffer_size)
+    {
+      m_zipmem.base = (char*)buffer;
+      m_zipmem.size = (uLong)buffer_size;
+      fill_memory_filefunc(&m_filefunc, &m_zipmem);
+
+      return initMemory(m_filefunc);
+    }
+
     std::vector<ZipEntry> entries()
     {
       std::vector<ZipEntry> entrylist;
       getEntries(entrylist);
       return entrylist;
     }
-
-    
 
     bool extractAll(const std::string& destination, const std::map<std::string, std::string>& alternativeNames)
     {
@@ -466,6 +473,18 @@ namespace zipper {
     , m_impl(new Impl(*this))
   {
     if (!m_impl->initWithStream(m_ibuffer))
+      throw EXCEPTION_CLASS("Error loading zip in memory!");
+    m_open = true;
+  }
+
+  Unzipper::Unzipper(void* buffer, size_t n_size)
+    : m_ibuffer(*(new std::stringstream()))
+    , m_vecbuffer(*(new std::vector<unsigned char>())) //not used but using local variable throws exception
+    , m_usingMemoryVector(false)
+    , m_usingStream(true)
+    , m_impl(new Impl(*this))
+  {
+    if (!m_impl->initWithBuffer(buffer, n_size))
       throw EXCEPTION_CLASS("Error loading zip in memory!");
     m_open = true;
   }

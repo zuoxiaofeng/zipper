@@ -21,6 +21,8 @@ include (CheckCSourceRuns)
 include (CheckSymbolExists)
 include (CheckTypeSize)
 
+set(INSTALL_BIN_DIR "${CMAKE_BINARY_DIR}/out/" CACHE PATH "Installation directory for executables")
+
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION.txt")
 
     file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION.txt" VersionString NEWLINE_CONSUME)
@@ -103,18 +105,30 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 or CMAKE_C_FLAGS are used), Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
 endif()
 
+if(WITH_STATIC_RUNTIME)
+  find_library(LIBZ_LIBRARY
+      NAMES zlibstatic.lib
+      PATHS /usr/lib /usr/local/lib
+            ${CMAKE_OSX_SYSROOT}/usr/lib
+            ${ZIPPER_DEPENDENCY_DIR}/lib
+            ${ADDITIONAL_LIB_DIRS}
+            $ENV{ZLIBROOT}/lib
+      DOC "The file name of the zip compression library."
+  )
+else()
+  find_library(LIBZ_LIBRARY
+      NAMES zdll.lib z zlib.lib
+      PATHS /usr/lib /usr/local/lib
+            ${CMAKE_OSX_SYSROOT}/usr/lib
+            ${ZIPPER_DEPENDENCY_DIR}/lib
+            ${ADDITIONAL_LIB_DIRS}
+            $ENV{ZLIBROOT}/lib
+      DOC "The file name of the zip compression library."
+  )
+endif(WITH_STATIC_RUNTIME)
 
-find_library(LIBZ_LIBRARY
-    NAMES zdll.lib z zlib.lib
-    PATHS /usr/lib /usr/local/lib
-          ${CMAKE_OSX_SYSROOT}/usr/lib
-          ${ZIPPER_DEPENDENCY_DIR}/lib
-          ${ADDITIONAL_LIB_DIRS}
-          $ENV{ZLIBROOT}/lib
-    DOC "The file name of the zip compression library."
-)
-
-
+message(STATUS "asaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+message(STATUS ${LIBZ_LIBRARY})
 if (NOT LIBZ_INCLUDE_DIR)
   find_path(LIBZ_INCLUDE_DIR
       NAMES zlib.h zlib/zlib.h
@@ -190,7 +204,12 @@ if(MSVC OR USING_INTEL)
             if(${flag_var} MATCHES "/MD")
                 string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
             endif(${flag_var} MATCHES "/MD")
-            
+
+
+            if(${flag_var} MATCHES "/MDd")
+              string(REGEX REPLACE "/MDd" "/MTd" ${flag_var} "${${flag_var}}")
+            endif(${flag_var} MATCHES "/MDd")
+
         endforeach(flag_var)
     add_definitions( -D_MT)
     endif(WITH_STATIC_RUNTIME)
@@ -343,9 +362,9 @@ if (BUILD_SHARED_VERSION)
   target_link_libraries(${ZIPPER_LIBRARY} ${LIBZ_LIBRARY} ${EXTRA_LIBS})
   
   INSTALL(TARGETS ${ZIPPER_LIBRARY}
-          RUNTIME DESTINATION bin
-          LIBRARY DESTINATION lib
-          ARCHIVE DESTINATION lib
+          RUNTIME DESTINATION ${INSTALL_BIN_DIR}/bin
+          LIBRARY DESTINATION ${INSTALL_BIN_DIR}/lib
+          ARCHIVE DESTINATION ${INSTALL_BIN_DIR}/lib
   )
 endif()
 
@@ -356,9 +375,9 @@ if (BUILD_STATIC_VERSION)
   target_link_libraries(${ZIPPER_LIBRARY}-static ${LIBZ_LIBRARY} ${EXTRA_LIBS})
   
   INSTALL(TARGETS ${ZIPPER_LIBRARY}-static
-          RUNTIME DESTINATION bin
-          LIBRARY DESTINATION lib
-          ARCHIVE DESTINATION lib
+          RUNTIME DESTINATION ${INSTALL_BIN_DIR}/bin
+          LIBRARY DESTINATION ${INSTALL_BIN_DIR}/lib
+          ARCHIVE DESTINATION ${INSTALL_BIN_DIR}/lib
   )
 endif()
 
@@ -398,7 +417,7 @@ endif()
 file(GLOB ZIPPER_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/zipper/*.h ${CMAKE_CURRENT_SOURCE_DIR}/minizip/*.h  )
 install(FILES 
         ${ZIPPER_HEADERS}
-        DESTINATION include/zipper
+        DESTINATION ${INSTALL_BIN_DIR}/include/zipper
 )
 
 message(STATUS "

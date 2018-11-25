@@ -161,4 +161,4 @@ test/*.zip
 
 *.txt.user
 
-build/
+build*/

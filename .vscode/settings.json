@@ -1,0 +1,11 @@
+{
+    "cmake.configureArgs": [
+        "-DWITH_STATIC_RUNTIME=ON"
+    ],
+    "cmake.buildArgs": [],
+    "cmake.environment": {
+        "ZLIBROOT": "F:\\workdir\\code\\MyLibrary\\zlib\\build-static\\out"
+    },
+    "cmake.buildDirectory": "${workspaceRoot}/build-static",
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
+}
